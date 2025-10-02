@@ -167,7 +167,8 @@ async function loadStation(stationId) {
         currentStation = station;
         
         // Fill form fields
-        document.getElementById('stationId').value = station.id || '';
+        // Use the filename (stationId parameter) as the ID, not station.id which is a number
+        document.getElementById('stationId').value = stationId;
         document.getElementById('stationName').value = station.stationName || '';
         document.getElementById('frequency').value = station.frequency || '';
         document.getElementById('location').value = station.location || '';
