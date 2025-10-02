@@ -92,19 +92,24 @@ function App() {
   }
 
   const handleDelete = (stationId) => {
-    if (confirm('Are you sure you want to delete this station?')) {
+    const stationToDelete = stations.find(s => s.id === stationId)
+    const stationName = stationToDelete ? stationToDelete.name : stationId
+    
+    if (confirm(`Are you sure you want to delete "${stationName}"?\n\nThis will download an updated index.json file. You'll need to manually remove ${stationId}.json from your GitHub repository.`)) {
       const updatedStations = stations.filter(s => s.id !== stationId)
       const updatedIndex = stationIndex.filter(id => id !== stationId)
-      setStations(updatedStations)
-      setStationIndex(updatedIndex)
       
       setMessage({
         type: 'success',
-        text: 'Station deleted! Remember to remove the file from your repository and update index.json.'
+        text: `Station "${stationName}" marked for deletion. Download the updated index.json below and remove ${stationId}.json from your repository.`
       })
 
       // Download updated index
       downloadIndexJSON(updatedIndex)
+      
+      // Update local state AFTER download
+      setStations(updatedStations)
+      setStationIndex(updatedIndex)
     }
   }
 
