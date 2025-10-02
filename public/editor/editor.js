@@ -140,9 +140,17 @@ async function loadStationsList() {
         const stationList = document.getElementById('stationList');
         stationList.innerHTML = '';
         
-        console.log('Loading stations:', data.stations);
+        // Handle both array format and object format
+        const stations = Array.isArray(data) ? data : (data.stations || []);
+        
+        console.log('Loading stations:', stations);
 
-        for (const stationId of data.stations) {
+        if (stations.length === 0) {
+            stationList.innerHTML = '<p style="padding: 20px; text-align: center; color: #6b7280;">No stations found</p>';
+            return;
+        }
+
+        for (const stationId of stations) {
             const stationResponse = await fetch(`../data/stations/${stationId}.json`);
             const station = await stationResponse.json();
             
