@@ -424,10 +424,29 @@ async function saveStation() {
     const stationId = document.getElementById('stationId').value.trim();
     const stationName = document.getElementById('stationName').value.trim();
 
-    if (!stationId || !stationName) {
-        alert('Station ID and Name are required');
+    // Debug logging
+    console.log('Save attempt - Field values:', {
+        stationId: stationId,
+        stationName: stationName,
+        stationIdElement: document.getElementById('stationId'),
+        stationNameElement: document.getElementById('stationName'),
+        stationIdValue: document.getElementById('stationId').value,
+        stationNameValue: document.getElementById('stationName').value
+    });
+
+    if (!stationId) {
+        alert('❌ Station ID is required.\n\nThe Station ID field appears to be empty.\nPlease enter a station ID (e.g., krvb-fm)');
+        document.getElementById('stationId').focus();
         return;
     }
+    
+    if (!stationName) {
+        alert('❌ Station Name is required.\n\nThe Station Name field appears to be empty.\nPlease enter a station name (e.g., KRVB - The River)');
+        document.getElementById('stationName').focus();
+        return;
+    }
+    
+    console.log('✅ Validation passed, proceeding with save...');
 
     const stationData = {
         id: stationId,
