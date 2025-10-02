@@ -220,6 +220,18 @@ function StationEditor({ station, isNew, onSave, onCancel }) {
               />
             </div>
 
+            <div className="form-group">
+              <label>Full Content (Complete Station History)</label>
+              <textarea
+                name="fullContent"
+                value={formData.fullContent}
+                onChange={handleChange}
+                placeholder="Complete detailed station history from PDFs..."
+                style={{ minHeight: '400px' }}
+              />
+              <small>This is the long-form content that appears in the modal when users click "Read Complete Station Profile"</small>
+            </div>
+
             <div className="form-actions">
               <button type="button" className="btn btn-secondary" onClick={onCancel}>
                 Cancel

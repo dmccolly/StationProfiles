@@ -53,6 +53,7 @@ function App() {
       established: '',
       synopsis: '',
       fullProfile: '',
+      fullContent: '',
       logo: '',
       website: '',
       facebook: '',
