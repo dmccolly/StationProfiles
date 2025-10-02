@@ -1,0 +1,471 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.editor-container {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+    max-width: 1800px;
+    margin: 0 auto;
+}
+
+/* Header */
+.editor-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.editor-header h1 {
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.header-actions {
+    display: flex;
+    gap: 10px;
+}
+
+/* Buttons */
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background: #10b981;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #059669;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+.btn-secondary {
+    background: white;
+    color: #667eea;
+    border: 2px solid #667eea;
+}
+
+.btn-secondary:hover {
+    background: #667eea;
+    color: white;
+}
+
+.btn-danger {
+    background: #ef4444;
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #dc2626;
+}
+
+.btn-small {
+    padding: 6px 12px;
+    font-size: 12px;
+}
+
+/* Layout */
+.editor-layout {
+    display: grid;
+    grid-template-columns: 300px 1fr 400px;
+    gap: 0;
+    min-height: calc(100vh - 140px);
+}
+
+/* Sidebar */
+.sidebar {
+    background: #f9fafb;
+    padding: 30px;
+    border-right: 1px solid #e5e7eb;
+    overflow-y: auto;
+    max-height: calc(100vh - 140px);
+}
+
+.sidebar h2 {
+    font-size: 18px;
+    margin-bottom: 20px;
+    color: #1f2937;
+}
+
+.sidebar h3 {
+    font-size: 16px;
+    margin: 20px 0 15px 0;
+    color: #374151;
+}
+
+.sidebar hr {
+    margin: 20px 0;
+    border: none;
+    border-top: 1px solid #e5e7eb;
+}
+
+/* Form Groups */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 6px;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.form-group textarea {
+    resize: vertical;
+    font-family: inherit;
+}
+
+/* Main Editor */
+.editor-main {
+    padding: 30px;
+    overflow-y: auto;
+    max-height: calc(100vh - 140px);
+}
+
+.editor-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.tab-btn {
+    padding: 12px 24px;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    font-size: 14px;
+    font-weight: 500;
+    color: #6b7280;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.tab-btn.active {
+    color: #667eea;
+    border-bottom-color: #667eea;
+}
+
+.tab-btn:hover {
+    color: #667eea;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.tab-content h2 {
+    font-size: 18px;
+    margin-bottom: 15px;
+    color: #1f2937;
+}
+
+/* Quill Editor Customization */
+#profileEditor,
+#contentEditor {
+    background: white;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    min-height: 300px;
+}
+
+.ql-container {
+    font-size: 15px;
+    min-height: 250px;
+}
+
+.ql-editor {
+    min-height: 250px;
+}
+
+/* Image Section */
+.image-section {
+    margin-top: 40px;
+    padding: 20px;
+    background: #f9fafb;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+}
+
+.image-section h3 {
+    font-size: 16px;
+    margin-bottom: 15px;
+    color: #1f2937;
+}
+
+.image-controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.current-image {
+    margin-top: 20px;
+    padding: 20px;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+}
+
+.current-image h4 {
+    font-size: 14px;
+    margin-bottom: 15px;
+    color: #374151;
+}
+
+.current-image img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    display: block;
+}
+
+.image-style-controls {
+    margin: 20px 0;
+}
+
+.image-style-controls h5 {
+    font-size: 13px;
+    margin-bottom: 15px;
+    color: #374151;
+    font-weight: 600;
+}
+
+.control-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.control-row label {
+    min-width: 100px;
+    font-size: 13px;
+    color: #6b7280;
+}
+
+.control-row input[type="range"] {
+    flex: 1;
+}
+
+.control-row input[type="number"] {
+    width: 60px;
+    padding: 4px 8px;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+}
+
+.control-row input[type="color"] {
+    width: 50px;
+    height: 30px;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.control-row select {
+    flex: 1;
+    padding: 6px 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+}
+
+.control-row span {
+    min-width: 60px;
+    font-size: 13px;
+    color: #6b7280;
+}
+
+/* Preview Panel */
+.preview-panel {
+    background: #f9fafb;
+    padding: 30px;
+    border-left: 1px solid #e5e7eb;
+    overflow-y: auto;
+    max-height: calc(100vh - 140px);
+}
+
+.preview-panel h2 {
+    font-size: 18px;
+    margin-bottom: 20px;
+    color: #1f2937;
+}
+
+.preview-content {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    min-height: 400px;
+}
+
+.preview-placeholder {
+    color: #9ca3af;
+    text-align: center;
+    padding: 40px 20px;
+    font-style: italic;
+}
+
+/* Preview Panel Hidden State */
+.preview-panel.hidden {
+    display: none;
+}
+
+.editor-layout.preview-hidden {
+    grid-template-columns: 300px 1fr;
+}
+
+/* Modal */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal.active {
+    display: flex;
+}
+
+.modal-content {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    max-width: 600px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.modal-content h2 {
+    margin-bottom: 20px;
+    color: #1f2937;
+}
+
+#stationList {
+    display: grid;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.station-item {
+    padding: 15px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.station-item:hover {
+    background: #667eea;
+    color: white;
+    transform: translateX(5px);
+}
+
+/* Responsive */
+@media (max-width: 1400px) {
+    .editor-layout {
+        grid-template-columns: 280px 1fr 350px;
+    }
+}
+
+@media (max-width: 1200px) {
+    .editor-layout {
+        grid-template-columns: 250px 1fr;
+    }
+    
+    .preview-panel {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .editor-layout {
+        grid-template-columns: 1fr;
+    }
+    
+    .sidebar {
+        border-right: none;
+        border-bottom: 1px solid #e5e7eb;
+    }
+    
+    .image-controls {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}

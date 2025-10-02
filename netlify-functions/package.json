@@ -1,0 +1,13 @@
+{
+  "name": "station-profiles-api",
+  "version": "1.0.0",
+  "description": "Backend API for Station Profiles admin panel",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo &quot;Error: no test specified&quot; && exit 1"
+  },
+  "dependencies": {
+    "@octokit/rest": "^20.0.2",
+    "express": "^4.18.2"
+  }
+}
