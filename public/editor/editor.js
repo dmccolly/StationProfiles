@@ -133,14 +133,17 @@ function togglePreview() {
 // Load stations list
 async function loadStationsList() {
     try {
-        const response = await fetch('/data/stations/index.json');
+        // Use relative path from /editor/ directory
+        const response = await fetch('../data/stations/index.json');
         const data = await response.json();
         
         const stationList = document.getElementById('stationList');
         stationList.innerHTML = '';
+        
+        console.log('Loading stations:', data.stations);
 
         for (const stationId of data.stations) {
-            const stationResponse = await fetch(`/data/stations/${stationId}.json`);
+            const stationResponse = await fetch(`../data/stations/${stationId}.json`);
             const station = await stationResponse.json();
             
             const item = document.createElement('div');
@@ -161,7 +164,8 @@ async function loadStationsList() {
 // Load a specific station
 async function loadStation(stationId) {
     try {
-        const response = await fetch(`/data/stations/${stationId}.json`);
+        // Use relative path from /editor/ directory
+        const response = await fetch(`../data/stations/${stationId}.json`);
         const station = await response.json();
         
         currentStation = station;
