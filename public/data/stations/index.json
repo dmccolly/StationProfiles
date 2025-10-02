@@ -1,20 +1,22 @@
-[
-  "krvb",
-  "ktik", 
-  "kthi",
-  "ksas",
-  "kizn",
-  "kjot",
-  "kbsx",
-  "kawo",
-  "krbx",
-  "kboi",
-  "kbsu",
-  "kspd",
-  "kzmg",
-  "kxlt",
-  "ksrvfm",
-  "kkgl",
-  "kqfc",
-  "kfxd"
-]
+{
+  "stations": [
+    "kawo",
+    "kboi",
+    "kbsu",
+    "kbsx",
+    "kfxd",
+    "kizn",
+    "kjot",
+    "kkgl",
+    "kqfc",
+    "krbx",
+    "krvb",
+    "ksas",
+    "kspd",
+    "ksrvfm",
+    "kthi",
+    "ktik",
+    "kxlt",
+    "kzmg"
+  ]
+}
