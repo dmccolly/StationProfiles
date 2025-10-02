@@ -67,6 +67,12 @@ function setupEventListeners() {
     // Save station button
     document.getElementById('saveStation').addEventListener('click', saveStation);
 
+    // Delete station button (if exists)
+    const deleteBtn = document.getElementById('deleteStation');
+    if (deleteBtn) {
+        deleteBtn.addEventListener('click', deleteStation);
+    }
+
     // Preview toggle
     document.getElementById('previewToggle').addEventListener('click', togglePreview);
 
@@ -440,7 +446,68 @@ async function saveStation() {
         logo: currentImage || ''
     };
 
-    // Download JSON file
+    // Show loading state
+    const saveBtn = document.getElementById('saveStation');
+    const originalText = saveBtn.textContent;
+    saveBtn.textContent = 'Saving...';
+    saveBtn.disabled = true;
+
+    try {
+        // Determine if this is a new station or update
+        const action = currentStation && currentStation.id === stationId ? 'update' : 'create';
+        
+        // Call the Netlify function
+        const response = await fetch('/.netlify/functions/update-station', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                action: action,
+                stationId: stationId,
+                stationData: stationData
+            })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            throw new Error(result.error || result.message || 'Failed to save station');
+        }
+
+        // Update current station
+        currentStation = stationData;
+
+        // Show success message
+        alert(`✅ Success!\n\nStation ${action === 'create' ? 'created' : 'updated'} successfully!\n\nChanges have been pushed to GitHub and will be live in about 2 minutes after Netlify deploys.`);
+
+        // Reset button
+        saveBtn.textContent = originalText;
+        saveBtn.disabled = false;
+
+    } catch (error) {
+        console.error('Error saving station:', error);
+        
+        // Show error with fallback option
+        const fallback = confirm(
+            `❌ Error saving to GitHub:\n\n${error.message}\n\n` +
+            `Would you like to download the JSON file manually instead?\n\n` +
+            `Click OK to download, or Cancel to try again.`
+        );
+
+        if (fallback) {
+            // Fallback to manual download
+            downloadStationJSON(stationData, stationId);
+        }
+
+        // Reset button
+        saveBtn.textContent = originalText;
+        saveBtn.disabled = false;
+    }
+}
+
+// Fallback function to download JSON manually
+function downloadStationJSON(stationData, stationId) {
     const dataStr = JSON.stringify(stationData, null, 2);
     const dataBlob = new Blob([dataStr], { type: 'application/json' });
     const url = URL.createObjectURL(dataBlob);
@@ -452,12 +519,111 @@ async function saveStation() {
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
 
-    alert(`Station saved! File downloaded: ${stationId}.json\n\nPlease upload this file to GitHub at:\npublic/data/stations/${stationId}.json`);
+    alert(`Station data downloaded: ${stationId}.json\n\nPlease upload this file to GitHub at:\npublic/data/stations/${stationId}.json`);
 }
 
 // Close modal
 function closeModal() {
     document.getElementById('stationModal').classList.remove('active');
+}
+
+// Delete station
+async function deleteStation() {
+    if (!currentStation || !currentStation.id) {
+        alert('No station loaded to delete');
+        return;
+    }
+
+    const confirmDelete = confirm(
+        `⚠️ WARNING: Delete Station?\n\n` +
+        `Station: ${currentStation.stationName}\n` +
+        `ID: ${currentStation.id}\n\n` +
+        `This action cannot be undone!\n\n` +
+        `Are you sure you want to delete this station?`
+    );
+
+    if (!confirmDelete) {
+        return;
+    }
+
+    // Double confirmation
+    const doubleConfirm = confirm(
+        `🚨 FINAL CONFIRMATION\n\n` +
+        `You are about to permanently delete:\n` +
+        `${currentStation.stationName}\n\n` +
+        `Click OK to proceed with deletion.`
+    );
+
+    if (!doubleConfirm) {
+        return;
+    }
+
+    // Show loading state
+    const deleteBtn = document.getElementById('deleteStation');
+    const originalText = deleteBtn ? deleteBtn.textContent : 'Delete Station';
+    if (deleteBtn) {
+        deleteBtn.textContent = 'Deleting...';
+        deleteBtn.disabled = true;
+    }
+
+    try {
+        // Call the Netlify function
+        const response = await fetch('/.netlify/functions/update-station', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                action: 'delete',
+                stationId: currentStation.id
+            })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            throw new Error(result.error || result.message || 'Failed to delete station');
+        }
+
+        // Show success message
+        alert(`✅ Station Deleted!\n\n${currentStation.stationName} has been removed from GitHub.\n\nChanges will be live in about 2 minutes after Netlify deploys.`);
+
+        // Clear the form
+        currentStation = null;
+        document.getElementById('stationId').value = '';
+        document.getElementById('stationName').value = '';
+        document.getElementById('frequency').value = '';
+        document.getElementById('location').value = '';
+        document.getElementById('format').value = '';
+        document.getElementById('established').value = '';
+        document.getElementById('synopsis').value = '';
+        document.getElementById('website').value = '';
+        document.getElementById('facebook').value = '';
+        document.getElementById('twitter').value = '';
+        document.getElementById('instagram').value = '';
+        profileEditor.root.innerHTML = '';
+        contentEditor.root.innerHTML = '';
+        removeImage();
+
+        // Reload stations list
+        loadStationsList();
+
+        // Reset button
+        if (deleteBtn) {
+            deleteBtn.textContent = originalText;
+            deleteBtn.disabled = false;
+        }
+
+    } catch (error) {
+        console.error('Error deleting station:', error);
+        alert(`❌ Error deleting station:\n\n${error.message}\n\nPlease try again or contact support.`);
+
+        // Reset button
+        if (deleteBtn) {
+            deleteBtn.textContent = originalText;
+            deleteBtn.disabled = false;
+        }
+    }
 }
 
 // Make closeModal available globally

@@ -1,6 +1,6 @@
 [build]
-  command = "npm run build"
-  publish = "radio-station-showcase-fixed/public"
+  command = "cd netlify-functions && npm install && cd .."
+  publish = "public"
   functions = "netlify-functions"
 
 [build.environment]
@@ -10,3 +10,6 @@
   from = "/api/*"
   to = "/.netlify/functions/:splat"
   status = 200
+
+[functions]
+  directory = "netlify-functions"
