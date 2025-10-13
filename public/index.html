@@ -416,8 +416,12 @@
         }
 
         function formatContent(text) {
+            // First, handle the escaped newlines from JSON
+            // The text comes with literal \n characters that need to be converted
+            text = text.replace(/\\n/g, '\n');
+            
             // Split by double newlines to get paragraphs
-            const sections = text.split(/\\n\\n+/);
+            const sections = text.split(/\n\n+/);
             let html = '';
             
             sections.forEach(section => {
@@ -436,7 +440,7 @@
                     html += `<h3>${section.replace(/^##\s*/, '')}</h3>`;
                 } else {
                     // Regular paragraph - replace single newlines with <br>
-                    const formatted = section.replace(/\\n/g, '<br>');
+                    const formatted = section.replace(/\n/g, '<br>');
                     html += `<p>${formatted}</p>`;
                 }
             });
