@@ -225,26 +225,36 @@
             border-bottom: 2px solid rgba(59, 130, 246, 0.3);
             padding-bottom: 10px;
             color: #1a1a1a;
-            margin-top: 24px;
-            margin-bottom: 12px;
+            margin-top: 32px;
+            margin-bottom: 16px;
+            font-weight: 700;
         }
 
         .modal-body h2 {
-            font-size: 1.5rem;
+            font-size: 1.6rem;
             color: #1a1a1a;
-            margin-top: 24px;
-            margin-bottom: 12px;
+            margin-top: 28px;
+            margin-bottom: 14px;
+            font-weight: 700;
+            border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+            padding-bottom: 8px;
         }
 
         .modal-body h3 {
-            font-size: 1.2rem;
-            color: #1a1a1a;
+            font-size: 1.3rem;
+            color: #2d2d2d;
             margin-top: 24px;
             margin-bottom: 12px;
+            font-weight: 600;
         }
 
         .modal-body p {
             margin-bottom: 16px;
+            text-align: justify;
+        }
+
+        .modal-body p:first-child {
+            margin-top: 0;
         }
 
         .modal-body strong {
@@ -295,10 +305,6 @@
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>History of Idaho Broadcasting</h1>
-            <p class="subtitle">Celebrating Idaho's rich media legacy.</p>
-        </div>
         <div id="stations-container">
             <div class="loading">Loading stations...</div>
         </div>
@@ -402,11 +408,40 @@
             modalTitle.textContent = displayName;
             
             const content = station.fullContent || station.fullProfile || 'No detailed information available.';
-            const formattedContent = content.replace(/\\n/g, '<br>');
+            const formattedContent = formatContent(content);
             modalBody.innerHTML = formattedContent;
             
             modal.classList.add('active');
             document.body.style.overflow = 'hidden';
+        }
+
+        function formatContent(text) {
+            // Split by double newlines to get paragraphs
+            const sections = text.split(/\\n\\n+/);
+            let html = '';
+            
+            sections.forEach(section => {
+                section = section.trim();
+                if (!section) return;
+                
+                // Check if it's a heading (all caps or ends with colon, or starts with ##)
+                if (section.match(/^[A-Z][A-Z\s]+$/) && section.length < 100) {
+                    // Main heading
+                    html += `<h2>${section}</h2>`;
+                } else if (section.match(/^[A-Z][^.!?]*:$/)) {
+                    // Subheading ending with colon
+                    html += `<h3>${section}</h3>`;
+                } else if (section.startsWith('##')) {
+                    // Markdown-style heading
+                    html += `<h3>${section.replace(/^##\s*/, '')}</h3>`;
+                } else {
+                    // Regular paragraph - replace single newlines with <br>
+                    const formatted = section.replace(/\\n/g, '<br>');
+                    html += `<p>${formatted}</p>`;
+                }
+            });
+            
+            return html;
         }
 
         function closeModal() {
