@@ -6,6 +6,12 @@ const OWNER = 'dmccolly';
 const REPO = 'StationProfiles';
 const BRANCH = 'main';
 
+console.log('GITHUB_TOKEN exists:', !!GITHUB_TOKEN);
+
+if (!GITHUB_TOKEN) {
+  console.error('GITHUB_TOKEN is not set in environment variables!');
+}
+
 const octokit = new Octokit({
   auth: GITHUB_TOKEN
 });
@@ -37,13 +43,22 @@ exports.handler = async (event, context) => {
   }
 
   try {
-    const { action, stationId, stationData } = JSON.parse(event.body);
+    console.log('Received event.body:', event.body);
+    const parsedBody = JSON.parse(event.body);
+    console.log('Parsed body:', parsedBody);
+    
+    const { action, stationId, stationData } = parsedBody;
+    console.log('Extracted values - action:', action, 'stationId:', stationId);
 
     if (!action || !stationId) {
+      console.error('Missing fields - action:', action, 'stationId:', stationId);
       return {
         statusCode: 400,
         headers,
-        body: JSON.stringify({ error: 'Missing required fields: action, stationId' })
+        body: JSON.stringify({ 
+          error: 'Missing required fields: action, stationId',
+          received: { action, stationId, hasBody: !!event.body }
+        })
       };
     }
 
