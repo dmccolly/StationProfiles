@@ -121,6 +121,10 @@ function App() {
   }
 
   const handleDelete = async (stationId) => {
+    console.log('handleDelete called with stationId:', stationId)
+    console.log('Type of stationId:', typeof stationId)
+    console.log('stationId value:', JSON.stringify(stationId))
+    
     const stationToDelete = stations.find(s => s.id === stationId)
     const stationName = stationToDelete ? stationToDelete.name : stationId
 
@@ -128,15 +132,19 @@ function App() {
       try {
         setLoading(true)
         
+        const requestBody = {
+          action: 'delete',
+          stationId: stationId
+        }
+        
+        console.log('Sending request body:', JSON.stringify(requestBody))
+        
         const response = await fetch('/.netlify/functions/update-station', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({
-            action: 'delete',
-            stationId: stationId
-          })
+          body: JSON.stringify(requestBody)
         })
 
         const result = await response.json()
