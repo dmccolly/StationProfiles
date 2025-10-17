@@ -39,7 +39,14 @@ function StationList({ stations, onEdit, onDelete }) {
             </button>
             <button 
               className="btn btn-danger" 
-              onClick={() => onDelete(station.id)}
+              onClick={() => {
+                console.log('=== DELETE BUTTON CLICKED ===')
+                console.log('Station object:', station)
+                console.log('Station.id:', station.id)
+                console.log('Station keys:', Object.keys(station))
+                console.log('Calling onDelete with:', station.id)
+                onDelete(station.id)
+              }}
             >
               🗑️ Delete
             </button>
