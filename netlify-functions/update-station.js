@@ -1,14 +1,41 @@
-const { Octokit } = require('@octokit/rest');
+const https = require('https');
 
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 const OWNER = 'dmccolly';
 const REPO = 'StationProfiles';
 const BRANCH = 'main';
 
-const octokit = new Octokit({
-  auth: GITHUB_TOKEN,
-  userAgent: 'StationProfiles-Admin/1.0.0'
-});
+function makeRequest(method, path, data = null) {
+  return new Promise((resolve, reject) => {
+    const options = {
+      hostname: 'api.github.com',
+      path: path,
+      method: method,
+      headers: {
+        'Authorization': `Bearer ${GITHUB_TOKEN}`,
+        'User-Agent': 'StationProfiles-Admin',
+        'Accept': 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json'
+      }
+    };
+
+    const req = https.request(options, (res) => {
+      let body = '';
+      res.on('data', chunk => body += chunk);
+      res.on('end', () => {
+        if (res.statusCode >= 200 && res.statusCode < 300) {
+          resolve(JSON.parse(body || '{}'));
+        } else {
+          reject(new Error(`GitHub API error: ${res.statusCode} - ${body}`));
+        }
+      });
+    });
+
+    req.on('error', reject);
+    if (data) req.write(JSON.stringify(data));
+    req.end();
+  });
+}
 
 exports.handler = async (event, context) => {
   const headers = {
@@ -43,20 +70,12 @@ exports.handler = async (event, context) => {
     switch (action) {
       case 'delete':
         // Get file SHA
-        const { data: fileToDelete } = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
-          owner: OWNER,
-          repo: REPO,
-          path: path,
-          ref: BRANCH
-        });
+        const fileInfo = await makeRequest('GET', `/repos/${OWNER}/${REPO}/contents/${path}?ref=${BRANCH}`);
         
         // Delete file
-        await octokit.request('DELETE /repos/{owner}/{repo}/contents/{path}', {
-          owner: OWNER,
-          repo: REPO,
-          path: path,
+        await makeRequest('DELETE', `/repos/${OWNER}/${REPO}/contents/${path}`, {
           message: `Delete station: ${stationId}`,
-          sha: fileToDelete.sha,
+          sha: fileInfo.sha,
           branch: BRANCH
         });
         
@@ -84,29 +103,21 @@ exports.handler = async (event, context) => {
         // Try to get existing file
         let sha = null;
         try {
-          const { data: existingFile } = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
-            owner: OWNER,
-            repo: REPO,
-            path: path,
-            ref: BRANCH
-          });
+          const existingFile = await makeRequest('GET', `/repos/${OWNER}/${REPO}/contents/${path}?ref=${BRANCH}`);
           sha = existingFile.sha;
         } catch (e) {
           // File doesn't exist
         }
         
         // Create or update
-        const updateParams = {
-          owner: OWNER,
-          repo: REPO,
-          path: path,
+        const updateData = {
           message: sha ? `Update station: ${stationId}` : `Create station: ${stationId}`,
           content: content,
           branch: BRANCH
         };
-        if (sha) updateParams.sha = sha;
+        if (sha) updateData.sha = sha;
         
-        await octokit.request('PUT /repos/{owner}/{repo}/contents/{path}', updateParams);
+        await makeRequest('PUT', `/repos/${OWNER}/${REPO}/contents/${path}`, updateData);
         
         // Update index
         await updateIndex();
@@ -126,26 +137,19 @@ exports.handler = async (event, context) => {
     }
   } catch (error) {
     console.error('Error:', error.message);
-    console.error('Error status:', error.status);
     return {
       statusCode: 500,
       headers,
       body: JSON.stringify({
         error: 'Internal server error',
-        message: error.message,
-        status: error.status
+        message: error.message
       })
     };
   }
 };
 
 async function updateIndex() {
-  const { data: files } = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
-    owner: OWNER,
-    repo: REPO,
-    path: 'public/data/stations',
-    ref: BRANCH
-  });
+  const files = await makeRequest('GET', `/repos/${OWNER}/${REPO}/contents/public/data/stations?ref=${BRANCH}`);
   
   const stationFiles = files
     .filter(f => f.name.endsWith('.json') && f.name !== 'index.json')
@@ -155,17 +159,9 @@ async function updateIndex() {
   const indexBase64 = Buffer.from(indexContent).toString('base64');
   
   const indexPath = 'public/data/stations/index.json';
-  const { data: indexFile } = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
-    owner: OWNER,
-    repo: REPO,
-    path: indexPath,
-    ref: BRANCH
-  });
+  const indexFile = await makeRequest('GET', `/repos/${OWNER}/${REPO}/contents/${indexPath}?ref=${BRANCH}`);
   
-  await octokit.request('PUT /repos/{owner}/{repo}/contents/{path}', {
-    owner: OWNER,
-    repo: REPO,
-    path: indexPath,
+  await makeRequest('PUT', `/repos/${OWNER}/${REPO}/contents/${indexPath}`, {
     message: 'Update station index',
     content: indexBase64,
     sha: indexFile.sha,
