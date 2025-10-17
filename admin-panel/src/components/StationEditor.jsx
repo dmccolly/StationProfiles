@@ -45,7 +45,13 @@ function StationEditor({ station, isNew, onSave, onCancel }) {
       return
     }
 
-    onSave(formData)
+    // Ensure stationName is set for backend compatibility
+    const submitData = {
+      ...formData,
+      stationName: formData.name
+    }
+
+    onSave(submitData)
   }
 
   return (

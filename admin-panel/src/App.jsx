@@ -19,13 +19,19 @@ function App() {
       setLoading(true)
       // Load the index
       const indexRes = await fetch('/data/stations/index.json')
-      const index = await indexRes.json()
-      setStationIndex(index)
+      const indexData = await indexRes.json()
+      const stationIds = indexData.stations || []
+      setStationIndex(stationIds)
 
       // Load all station data
-      const stationPromises = index.map(async (id) => {
+      const stationPromises = stationIds.map(async (id) => {
         const res = await fetch(`/data/stations/${id}.json`)
-        return res.json()
+        const stationData = await res.json()
+        // Map stationName to name for consistency
+        return {
+          ...stationData,
+          name: stationData.stationName || stationData.name || ''
+        }
       })
 
       const stationsData = await Promise.all(stationPromises)
@@ -63,97 +69,104 @@ function App() {
     setIsAddingNew(true)
   }
 
-  const handleSave = (stationData) => {
-    // In a real implementation, this would save to a backend
-    // For now, we'll just update the local state and show instructions
-    
-    if (isAddingNew) {
-      setStations([...stations, stationData])
-      setStationIndex([...stationIndex, stationData.id])
-      setMessage({
-        type: 'success',
-        text: `Station "${stationData.name}" added! Download the JSON below and add it to your repository.`
+  const handleSave = async (stationData) => {
+    try {
+      setLoading(true)
+      
+      // Prepare data for backend - ensure stationName is set
+      const backendData = {
+        ...stationData,
+        stationName: stationData.name || stationData.stationName
+      }
+
+      const action = isAddingNew ? 'create' : 'update'
+      
+      const response = await fetch('/.netlify/functions/update-station', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          action: action,
+          stationId: stationData.id,
+          stationData: backendData
+        })
       })
-    } else {
-      const updatedStations = stations.map(s => 
-        s.id === stationData.id ? stationData : s
-      )
-      setStations(updatedStations)
+
+      const result = await response.json()
+
+      if (result.success) {
+        setMessage({
+          type: 'success',
+          text: `Station "${stationData.name}" ${action}d successfully!`
+        })
+        
+        // Reload stations to get updated data
+        await loadStations()
+        
+        setEditingStation(null)
+        setIsAddingNew(false)
+      } else {
+        throw new Error(result.error || 'Failed to save station')
+      }
+    } catch (error) {
+      console.error('Error saving station:', error)
       setMessage({
-        type: 'success',
-        text: `Station "${stationData.name}" updated! Download the JSON below and update your repository.`
+        type: 'error',
+        text: `Failed to save station: ${error.message}`
       })
+    } finally {
+      setLoading(false)
     }
-
-    setEditingStation(null)
-    setIsAddingNew(false)
-
-    // Trigger download of the JSON file
-    downloadStationJSON(stationData)
   }
 
-  const handleDelete = (stationId) => {
+  const handleDelete = async (stationId) => {
     const stationToDelete = stations.find(s => s.id === stationId)
     const stationName = stationToDelete ? stationToDelete.name : stationId
-    
-    if (confirm(`Are you sure you want to delete "${stationName}"?\n\nThis will download an updated index.json file. You'll need to manually remove ${stationId}.json from your GitHub repository.`)) {
-      const updatedStations = stations.filter(s => s.id !== stationId)
-      const updatedIndex = stationIndex.filter(id => id !== stationId)
-      
-      setMessage({
-        type: 'success',
-        text: `Station "${stationName}" marked for deletion. Download the updated index.json below and remove ${stationId}.json from your repository.`
-      })
 
-      // Download updated index
-      downloadIndexJSON(updatedIndex)
-      
-      // Update local state AFTER download
-      setStations(updatedStations)
-      setStationIndex(updatedIndex)
+    if (confirm(`Are you sure you want to delete "${stationName}"? This action cannot be undone.`)) {
+      try {
+        setLoading(true)
+        
+        const response = await fetch('/.netlify/functions/update-station', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            action: 'delete',
+            stationId: stationId
+          })
+        })
+
+        const result = await response.json()
+
+        if (result.success) {
+          setMessage({
+            type: 'success',
+            text: `Station "${stationName}" deleted successfully!`
+          })
+          
+          // Reload stations to get updated data
+          await loadStations()
+        } else {
+          throw new Error(result.error || 'Failed to delete station')
+        }
+      } catch (error) {
+        console.error('Error deleting station:', error)
+        setMessage({
+          type: 'error',
+          text: `Failed to delete station: ${error.message}`
+        })
+      } finally {
+        setLoading(false)
+      }
     }
   }
 
   const handleCancel = () => {
     setEditingStation(null)
     setIsAddingNew(false)
-  }
-
-  const downloadStationJSON = (station) => {
-    const dataStr = JSON.stringify(station, null, 2)
-    const dataBlob = new Blob([dataStr], { type: 'application/json' })
-    const url = URL.createObjectURL(dataBlob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `${station.id}.json`
-    link.click()
-    URL.revokeObjectURL(url)
-  }
-
-  const downloadIndexJSON = (index) => {
-    const dataStr = JSON.stringify(index, null, 2)
-    const dataBlob = new Blob([dataStr], { type: 'application/json' })
-    const url = URL.createObjectURL(dataBlob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = 'index.json'
-    link.click()
-    URL.revokeObjectURL(url)
-  }
-
-  const downloadAllData = () => {
-    // Download index
-    downloadIndexJSON(stationIndex)
-    
-    // Download all station files
-    stations.forEach(station => {
-      setTimeout(() => downloadStationJSON(station), 100)
-    })
-    
-    setMessage({
-      type: 'success',
-      text: 'All station data downloaded! Upload these files to /public/data/stations/ in your repository.'
-    })
   }
 
   if (loading) {
@@ -187,9 +200,6 @@ function App() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
           <h2 style={{ color: '#1a1a1a' }}>Stations ({stations.length})</h2>
           <div style={{ display: 'flex', gap: '1rem' }}>
-            <button className="btn btn-secondary" onClick={downloadAllData}>
-              💾 Download All Data
-            </button>
             <button className="btn btn-primary add-station-btn" onClick={handleAddNew}>
               ➕ Add New Station
             </button>

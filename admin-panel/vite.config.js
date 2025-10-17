@@ -7,5 +7,14 @@ export default defineConfig({
   build: {
     outDir: '../public/admin',
     emptyOutDir: true
+  },
+  server: {
+    proxy: {
+      '/data': {
+        target: 'http://localhost:8081',
+        changeOrigin: true,
+        rewrite: (path) => path
+      }
+    }
   }
 })
