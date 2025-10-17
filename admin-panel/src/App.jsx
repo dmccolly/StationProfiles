@@ -29,11 +29,11 @@ function App() {
         const stationData = await res.json()
         // Map stationName to name for consistency
         return {
-          ...stationData,
-          name: stationData.stationName || stationData.name || ''
-        }
-      })
-
+            ...stationData,
+            id: stationData.id || id, // Explicitly ensure id is set
+            name: stationData.stationName || stationData.name || ''
+           }
+         })
       const stationsData = await Promise.all(stationPromises)
         console.log("=== LOADED STATIONS ===", stationsData.length, stationsData[0])
          console.log('=== LOADED STATIONS ===', stationsData.length, stationsData[0])
