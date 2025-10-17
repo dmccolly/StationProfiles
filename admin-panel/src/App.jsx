@@ -35,6 +35,8 @@ function App() {
       })
 
       const stationsData = await Promise.all(stationPromises)
+        console.log("=== LOADED STATIONS ===", stationsData.length, stationsData[0])
+         console.log('=== LOADED STATIONS ===', stationsData.length, stationsData[0])
       setStations(stationsData)
       setLoading(false)
     } catch (error) {
