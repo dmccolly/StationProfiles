@@ -118,25 +118,21 @@ exports.handler = async (event, context) => {
       })
     };
 
-  
-    } catch (error) {
+  } catch (error) {
       console.error('=== ERROR IN MAIN HANDLER ===');
       console.error('Error message:', error.message);
       console.error('Error status:', error.status);
       console.error('Error name:', error.name);
-      console.error('Full error:', error);
-      return {
-        statusCode: 500,
-        headers,
-        body: JSON.stringify({
+    return {
+      statusCode: 500,
+      headers,
+      body: JSON.stringify({
           error: 'Internal server error',
-          message: error.message,
           status: error.status,
           details: error.toString()
-        })
-      };
-    }
-  };
+      })
+    };
+  }
 };
 
 async function updateStationFile(stationId, stationData) {
