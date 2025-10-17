@@ -142,7 +142,7 @@ async function updateStationFile(stationId, stationData) {
 
   try {
     // Try to get existing file to get its SHA
-    const { data: existingFile } = await octokit.repos.getContent({
+    const { data: existingFile } = await octokit.rest.repos.getContent({
       owner: OWNER,
       repo: REPO,
       path: path,
@@ -150,7 +150,7 @@ async function updateStationFile(stationId, stationData) {
     });
 
     // Update existing file
-    const response = await octokit.repos.createOrUpdateFileContents({
+    const response = await octokit.rest.repos.createOrUpdateFileContents({
       owner: OWNER,
       repo: REPO,
       path: path,
@@ -165,7 +165,7 @@ async function updateStationFile(stationId, stationData) {
   } catch (error) {
     if (error.status === 404) {
       // File doesn't exist, create it
-      const response = await octokit.repos.createOrUpdateFileContents({
+      const response = await octokit.rest.repos.createOrUpdateFileContents({
         owner: OWNER,
         repo: REPO,
         path: path,
@@ -185,7 +185,7 @@ async function deleteStationFile(stationId) {
 
   try {
     // Get file to get its SHA
-    const { data: existingFile } = await octokit.repos.getContent({
+    const { data: existingFile } = await octokit.rest.repos.getContent({
       owner: OWNER,
       repo: REPO,
       path: path,
@@ -193,7 +193,7 @@ async function deleteStationFile(stationId) {
     });
 
     // Delete file
-    const response = await octokit.repos.deleteFile({
+    const response = await octokit.rest.repos.deleteFile({
       owner: OWNER,
       repo: REPO,
       path: path,
@@ -217,7 +217,7 @@ async function updateIndexFile() {
   
   try {
     // Get all files in stations directory
-    const { data: files } = await octokit.repos.getContent({
+    const { data: files } = await octokit.rest.repos.getContent({
       owner: OWNER,
       repo: REPO,
       path: stationsPath,
@@ -235,7 +235,7 @@ async function updateIndexFile() {
     const indexPath = `${stationsPath}/index.json`;
 
     // Get existing index.json SHA
-    const { data: existingIndex } = await octokit.repos.getContent({
+    const { data: existingIndex } = await octokit.rest.repos.getContent({
       owner: OWNER,
       repo: REPO,
       path: indexPath,
@@ -243,7 +243,7 @@ async function updateIndexFile() {
     });
 
     // Update index.json
-    await octokit.repos.createOrUpdateFileContents({
+    await octokit.rest.repos.createOrUpdateFileContents({
       owner: OWNER,
       repo: REPO,
       path: indexPath,
