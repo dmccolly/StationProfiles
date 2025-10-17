@@ -7,6 +7,8 @@ const BRANCH = 'main';
 
 function makeRequest(method, path, data = null) {
   return new Promise((resolve, reject) => {
+    const postData = data ? JSON.stringify(data) : '';
+    
     const options = {
       hostname: 'api.github.com',
       path: path,
@@ -18,6 +20,10 @@ function makeRequest(method, path, data = null) {
         'Content-Type': 'application/json'
       }
     };
+    
+    if (postData) {
+      options.headers['Content-Length'] = Buffer.byteLength(postData);
+    }
 
     const req = https.request(options, (res) => {
       let body = '';
@@ -32,7 +38,7 @@ function makeRequest(method, path, data = null) {
     });
 
     req.on('error', reject);
-    if (data) req.write(JSON.stringify(data));
+    if (postData) req.write(postData);
     req.end();
   });
 }
@@ -69,19 +75,13 @@ exports.handler = async (event, context) => {
     
     switch (action) {
       case 'delete':
-        // Get file SHA
         const fileInfo = await makeRequest('GET', `/repos/${OWNER}/${REPO}/contents/${path}?ref=${BRANCH}`);
-        
-        // Delete file
         await makeRequest('DELETE', `/repos/${OWNER}/${REPO}/contents/${path}`, {
           message: `Delete station: ${stationId}`,
           sha: fileInfo.sha,
           branch: BRANCH
         });
-        
-        // Update index
         await updateIndex();
-        
         return {
           statusCode: 200,
           headers,
@@ -99,17 +99,12 @@ exports.handler = async (event, context) => {
         }
         
         const content = Buffer.from(JSON.stringify(stationData, null, 2)).toString('base64');
-        
-        // Try to get existing file
         let sha = null;
         try {
           const existingFile = await makeRequest('GET', `/repos/${OWNER}/${REPO}/contents/${path}?ref=${BRANCH}`);
           sha = existingFile.sha;
-        } catch (e) {
-          // File doesn't exist
-        }
+        } catch (e) {}
         
-        // Create or update
         const updateData = {
           message: sha ? `Update station: ${stationId}` : `Create station: ${stationId}`,
           content: content,
@@ -118,10 +113,7 @@ exports.handler = async (event, context) => {
         if (sha) updateData.sha = sha;
         
         await makeRequest('PUT', `/repos/${OWNER}/${REPO}/contents/${path}`, updateData);
-        
-        // Update index
         await updateIndex();
-        
         return {
           statusCode: 200,
           headers,
@@ -150,17 +142,11 @@ exports.handler = async (event, context) => {
 
 async function updateIndex() {
   const files = await makeRequest('GET', `/repos/${OWNER}/${REPO}/contents/public/data/stations?ref=${BRANCH}`);
-  
-  const stationFiles = files
-    .filter(f => f.name.endsWith('.json') && f.name !== 'index.json')
-    .map(f => f.name.replace('.json', ''));
-  
+  const stationFiles = files.filter(f => f.name.endsWith('.json') && f.name !== 'index.json').map(f => f.name.replace('.json', ''));
   const indexContent = JSON.stringify({ stations: stationFiles }, null, 2);
   const indexBase64 = Buffer.from(indexContent).toString('base64');
-  
   const indexPath = 'public/data/stations/index.json';
   const indexFile = await makeRequest('GET', `/repos/${OWNER}/${REPO}/contents/${indexPath}?ref=${BRANCH}`);
-  
   await makeRequest('PUT', `/repos/${OWNER}/${REPO}/contents/${indexPath}`, {
     message: 'Update station index',
     content: indexBase64,
