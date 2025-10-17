@@ -43,21 +43,37 @@ exports.handler = async (event, context) => {
   }
 
   try {
-    console.log('Received event.body:', event.body);
-    const parsedBody = JSON.parse(event.body);
+    console.log('Raw event.body:', event.body);
+    console.log('Type of event.body:', typeof event.body);
+    
+    // Handle both string and already-parsed body
+    let parsedBody;
+    if (typeof event.body === 'string') {
+      parsedBody = JSON.parse(event.body);
+    } else {
+      parsedBody = event.body;
+    }
+    
     console.log('Parsed body:', parsedBody);
     
-    const { action, stationId, stationData } = parsedBody;
+    const { action, stationId, stationData } = parsedBody || {};
     console.log('Extracted values - action:', action, 'stationId:', stationId);
 
     if (!action || !stationId) {
       console.error('Missing fields - action:', action, 'stationId:', stationId);
+      console.error('Full event:', JSON.stringify(event, null, 2));
       return {
         statusCode: 400,
         headers,
         body: JSON.stringify({ 
           error: 'Missing required fields: action, stationId',
-          received: { action, stationId, hasBody: !!event.body }
+          received: { 
+            action, 
+            stationId, 
+            bodyType: typeof event.body,
+            hasBody: !!event.body,
+            bodyContent: event.body 
+          }
         })
       };
     }
