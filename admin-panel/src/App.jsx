@@ -121,31 +121,46 @@ function App() {
   }
 
   const handleDelete = async (stationId) => {
-    console.log('handleDelete called with stationId:', stationId)
-    console.log('Type of stationId:', typeof stationId)
-    console.log('stationId value:', JSON.stringify(stationId))
+    console.log('=== DELETE FUNCTION CALLED ===')
+    console.log('1. stationId parameter:', stationId)
+    console.log('2. Type of stationId:', typeof stationId)
+    console.log('3. stationId is undefined?', stationId === undefined)
+    console.log('4. stationId is null?', stationId === null)
+    console.log('5. stationId stringified:', JSON.stringify(stationId))
+    console.log('6. Current stations array:', stations)
     
     const stationToDelete = stations.find(s => s.id === stationId)
+    console.log('7. Found station to delete:', stationToDelete)
     const stationName = stationToDelete ? stationToDelete.name : stationId
 
     if (confirm(`Are you sure you want to delete "${stationName}"? This action cannot be undone.`)) {
       try {
         setLoading(true)
         
+        // Create request body with explicit checks
         const requestBody = {
           action: 'delete',
           stationId: stationId
         }
         
-        console.log('Sending request body:', JSON.stringify(requestBody))
+        console.log('8. Request body object:', requestBody)
+        console.log('9. Request body.action:', requestBody.action)
+        console.log('10. Request body.stationId:', requestBody.stationId)
+        
+        const bodyString = JSON.stringify(requestBody)
+        console.log('11. Stringified body:', bodyString)
+        console.log('12. Body length:', bodyString.length)
         
         const response = await fetch('/.netlify/functions/update-station', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(requestBody)
+          body: bodyString
         })
+        
+        console.log('13. Response status:', response.status)
+        console.log('14. Response ok:', response.ok)
 
         const result = await response.json()
 
