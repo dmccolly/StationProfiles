@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Embed Codes - Station Admin Panel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+        }
+        
+        h1 {
+            color: #1a1a1a;
+            font-size: 2rem;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 40px;
+            font-size: 1.1rem;
+        }
+        
+        .url-input-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            border: 2px solid #e9ecef;
+        }
+        
+        .url-input-section h2 {
+            color: #1a1a1a;
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+        }
+        
+        .url-input-section p {
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+        
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        input[type="text"] {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: 'Courier New', monospace;
+        }
+        
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        .embed-section {
+            margin-bottom: 30px;
+        }
+        
+        .embed-section h3 {
+            color: #1a1a1a;
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .embed-section p {
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+        
+        .code-block {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            position: relative;
+            margin-bottom: 15px;
+        }
+        
+        .code-block code {
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 8px 16px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .copy-btn:hover {
+            background: #5568d3;
+        }
+        
+        .copy-btn.copied {
+            background: #28a745;
+        }
+        
+        .preview-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+        
+        .preview-section h4 {
+            color: #1a1a1a;
+            margin-bottom: 10px;
+        }
+        
+        .alert {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            color: #856404;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .alert strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        .success {
+            background: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+        }
+    </style>
+<script src="https://sites.super.myninja.ai/_assets/ninja-daytona-script.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>📻 Station Admin Panel - Embed Codes</h1>
+        <p class="subtitle">Generate embed codes for your Webflow site</p>
+        
+        <div class="alert">
+            <strong>⚠️ Important:</strong>
+            You need to enter your deployed site URL below. This should be your Netlify URL (e.g., https://your-site.netlify.app) or your custom domain.
+        </div>
+        
+        <div class="url-input-section">
+            <h2>Step 1: Enter Your Site URL</h2>
+            <p>Enter the full URL where your Station Profiles site is deployed (including https://)</p>
+            <div class="input-group">
+                <input type="text" id="siteUrl" placeholder="https://your-site.netlify.app" value="">
+                <button class="btn" onclick="generateEmbedCodes()">Generate Embed Codes</button>
+            </div>
+            <p style="font-size: 0.9rem; color: #999; margin-top: 10px;">
+                💡 Tip: You can find your Netlify URL in your Netlify dashboard under Site settings
+            </p>
+        </div>
+        
+        <div id="embedCodesContainer" style="display: none;">
+            <div class="alert success">
+                <strong>✅ Success!</strong>
+                Your embed codes are ready. Copy and paste them into your Webflow site.
+            </div>
+            
+            <div class="embed-section">
+                <h3>🎯 Option 1: Simple Iframe Embed (Recommended)</h3>
+                <p>Use this code to embed the admin panel directly in your Webflow page:</p>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode('code1')">Copy</button>
+                    <code id="code1"></code>
+                </div>
+            </div>
+            
+            <div class="embed-section">
+                <h3>🎨 Option 2: Styled Embed with Header</h3>
+                <p>This includes a styled header and better visual presentation:</p>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode('code2')">Copy</button>
+                    <code id="code2"></code>
+                </div>
+            </div>
+            
+            <div class="embed-section">
+                <h3>📱 Option 3: Responsive Embed</h3>
+                <p>This maintains aspect ratio and works well on all devices:</p>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode('code3')">Copy</button>
+                    <code id="code3"></code>
+                </div>
+            </div>
+            
+            <div class="embed-section">
+                <h3>🔗 Option 4: Button Link</h3>
+                <p>Open the admin panel in a new tab instead of embedding:</p>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode('code4')">Copy</button>
+                    <code id="code4"></code>
+                </div>
+            </div>
+            
+            <div class="embed-section">
+                <h3>📋 How to Use in Webflow</h3>
+                <div class="preview-section">
+                    <ol style="padding-left: 20px; line-height: 2;">
+                        <li>Copy one of the embed codes above</li>
+                        <li>In Webflow, add an <strong>Embed</strong> element to your page</li>
+                        <li>Paste the code into the embed element</li>
+                        <li>Publish your site to see the admin panel</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function generateEmbedCodes() {
+            const siteUrl = document.getElementById('siteUrl').value.trim();
+            
+            if (!siteUrl) {
+                alert('Please enter your site URL');
+                return;
+            }
+            
+            if (!siteUrl.startsWith('http://') && !siteUrl.startsWith('https://')) {
+                alert('Please enter a valid URL starting with https://');
+                return;
+            }
+            
+            // Remove trailing slash if present
+            const cleanUrl = siteUrl.replace(/\/$/, '');
+            
+            // Generate embed codes
+            const code1 = `<iframe 
+  src="${cleanUrl}/admin/" 
+  width="100%" 
+  height="800px" 
+  frameborder="0"
+  style="border: 1px solid #ddd; border-radius: 8px;">
+</iframe>`;
+            
+            const code2 = `<div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 12px;">
+  <div style="background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; text-align: center;">
+      <h2 style="margin: 0 0 5px 0; font-size: 1.8rem;">📻 Station Admin Panel</h2>
+      <p style="margin: 0; opacity: 0.9;">Manage your Idaho radio station profiles</p>
+    </div>
+    <iframe 
+      src="${cleanUrl}/admin/" 
+      width="100%" 
+      height="700px" 
+      frameborder="0"
+      style="border: none; display: block;">
+    </iframe>
+  </div>
+</div>`;
+            
+            const code3 = `<div style="position: relative; width: 100%; padding-bottom: 75%; background: #f5f5f5; border-radius: 8px; overflow: hidden;">
+  <iframe 
+    src="${cleanUrl}/admin/" 
+    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;"
+    frameborder="0">
+  </iframe>
+</div>`;
+            
+            const code4 = `<a href="${cleanUrl}/admin/" 
+   target="_blank" 
+   style="display: inline-block; padding: 15px 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 1.1rem; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4); transition: all 0.3s;">
+  📻 Open Station Management Tool
+</a>`;
+            
+            // Display codes
+            document.getElementById('code1').textContent = code1;
+            document.getElementById('code2').textContent = code2;
+            document.getElementById('code3').textContent = code3;
+            document.getElementById('code4').textContent = code4;
+            
+            // Show container
+            document.getElementById('embedCodesContainer').style.display = 'block';
+            
+            // Scroll to codes
+            document.getElementById('embedCodesContainer').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function copyCode(codeId) {
+            const code = document.getElementById(codeId).textContent;
+            const button = event.target;
+            
+            navigator.clipboard.writeText(code).then(() => {
+                button.textContent = 'Copied!';
+                button.classList.add('copied');
+                
+                setTimeout(() => {
+                    button.textContent = 'Copy';
+                    button.classList.remove('copied');
+                }, 2000);
+            }).catch(err => {
+                alert('Failed to copy code. Please copy manually.');
+            });
+        }
+        
+        // Try to detect current URL
+        window.addEventListener('load', () => {
+            const currentUrl = window.location.origin;
+            if (currentUrl && currentUrl !== 'null' && !currentUrl.includes('file://')) {
+                document.getElementById('siteUrl').value = currentUrl;
+            }
+        });
+    </script>
+</body>
+</html>

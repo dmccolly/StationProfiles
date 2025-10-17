@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Station Admin Panel - Embed</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .embed-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+        
+        .embed-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 30px;
+            text-align: center;
+        }
+        
+        .embed-header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+        
+        .embed-header p {
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+        
+        .iframe-container {
+            width: 100%;
+            height: calc(100vh - 140px);
+            min-height: 600px;
+        }
+        
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 400px;
+            font-size: 1.2rem;
+            color: #667eea;
+        }
+    </style>
+<script src="https://sites.super.myninja.ai/_assets/ninja-daytona-script.js"></script>
+</head>
+<body>
+    <div class="embed-container">
+        <div class="embed-header">
+            <h1>📻 Station Admin Panel</h1>
+            <p>Manage your Idaho radio station profiles</p>
+        </div>
+        <div class="iframe-container">
+            <iframe src="./admin/index.html" id="admin-frame"></iframe>
+        </div>
+    </div>
+    
+    <script>
+        // Handle iframe loading
+        const iframe = document.getElementById('admin-frame');
+        iframe.addEventListener('load', function() {
+            console.log('Admin panel loaded successfully');
+        });
+        
+        iframe.addEventListener('error', function() {
+            console.error('Failed to load admin panel');
+        });
+    </script>
+</body>
+</html>
