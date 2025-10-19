@@ -53,9 +53,16 @@ body {
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
 }
 
+/*
+ * Adjusted the grid-template-columns to reduce the minimum card width
+ * from 300px to 250px. This allows three station cards to fit
+ * across in the management tool when there is sufficient horizontal
+ * space without breaking the layout. The rest of the layout and
+ * responsive behavior remain unchanged.
+ */
 .stations-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: 1.5rem;
   margin-top: 1.5rem;
 }
