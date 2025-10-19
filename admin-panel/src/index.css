@@ -54,15 +54,17 @@ body {
 }
 
 /*
- * Adjusted the grid-template-columns to reduce the minimum card width
- * from 300px to 250px. This allows three station cards to fit
- * across in the management tool when there is sufficient horizontal
- * space without breaking the layout. The rest of the layout and
- * responsive behavior remain unchanged.
+ * Force the admin panel to display exactly three station cards per row on
+ * larger screens.  Using a fixed three-column grid ensures the cards
+ * align neatly regardless of the available space, while the mobile
+ * media query below collapses the layout to a single column for small
+ * screens.  This approach avoids relying on auto-fill and minmax
+ * calculations, guaranteeing a consistent three-across presentation.
  */
 .stations-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  /* Create three equal-width columns for the station cards */
+  grid-template-columns: repeat(3, 1fr);
   gap: 1.5rem;
   margin-top: 1.5rem;
 }
