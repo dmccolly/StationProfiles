@@ -1,6 +1,7 @@
 const https = require('https');
 
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+const NETLIFY_BUILD_HOOK = process.env.NETLIFY_BUILD_HOOK;
 const OWNER = 'dmccolly';
 const REPO = 'StationProfiles';
 const BRANCH = 'main';
@@ -39,6 +40,48 @@ function makeRequest(method, path, data = null) {
 
     req.on('error', reject);
     if (postData) req.write(postData);
+    req.end();
+  });
+}
+
+function triggerNetlifyBuild() {
+  return new Promise((resolve, reject) => {
+    if (!NETLIFY_BUILD_HOOK) {
+      console.log('No Netlify build hook configured, skipping rebuild trigger');
+      resolve({ skipped: true });
+      return;
+    }
+
+    const url = new URL(NETLIFY_BUILD_HOOK);
+    const options = {
+      hostname: url.hostname,
+      path: url.pathname + url.search,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    };
+
+    const req = https.request(options, (res) => {
+      let body = '';
+      res.on('data', chunk => body += chunk);
+      res.on('end', () => {
+        if (res.statusCode >= 200 && res.statusCode < 300) {
+          console.log('Netlify build triggered successfully');
+          resolve({ triggered: true });
+        } else {
+          console.error(`Netlify build hook error: ${res.statusCode} - ${body}`);
+          resolve({ triggered: false, error: body });
+        }
+      });
+    });
+
+    req.on('error', (error) => {
+      console.error('Error triggering Netlify build:', error.message);
+      resolve({ triggered: false, error: error.message });
+    });
+    
+    req.write(JSON.stringify({}));
     req.end();
   });
 }
@@ -82,6 +125,7 @@ exports.handler = async (event, context) => {
           branch: BRANCH
         });
         await updateIndex();
+        await triggerNetlifyBuild();
         return {
           statusCode: 200,
           headers,
@@ -114,6 +158,7 @@ exports.handler = async (event, context) => {
         
         await makeRequest('PUT', `/repos/${OWNER}/${REPO}/contents/${path}`, updateData);
         await updateIndex();
+        await triggerNetlifyBuild();
         return {
           statusCode: 200,
           headers,
