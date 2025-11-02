@@ -133,14 +133,15 @@ function togglePreview() {
 // Load stations list
 async function loadStationsList() {
     try {
-        // Use relative path from /editor/ directory
-        const response = await fetch('../data/stations/index.json');
+        const response = await fetch('../data/stations/index.json', { cache: 'no-store' });
+        if (!response.ok) {
+            throw new Error(`Failed to load station index (HTTP ${response.status})`);
+        }
         const data = await response.json();
         
         const stationList = document.getElementById('stationList');
         stationList.innerHTML = '';
         
-        // Handle both array format and object format
         const stations = Array.isArray(data) ? data : (data.stations || []);
         
         console.log('Loading stations:', stations);
@@ -150,30 +151,51 @@ async function loadStationsList() {
             return;
         }
 
+        const failedStations = [];
         for (const stationId of stations) {
-            const stationResponse = await fetch(`../data/stations/${stationId}.json`);
-            const station = await stationResponse.json();
-            
-            const item = document.createElement('div');
-            item.className = 'station-item';
-            item.innerHTML = `
-                <strong>${station.stationName || stationId}</strong><br>
-                <small>${station.frequency || ''} ${station.location || ''}</small>
-            `;
-            item.addEventListener('click', () => loadStation(stationId));
-            stationList.appendChild(item);
+            try {
+                const stationResponse = await fetch(`../data/stations/${stationId}.json`, { cache: 'no-store' });
+                if (!stationResponse.ok) {
+                    console.error(`Failed to load station: ${stationId} (HTTP ${stationResponse.status})`);
+                    failedStations.push(stationId);
+                    continue;
+                }
+                const station = await stationResponse.json();
+                
+                const item = document.createElement('div');
+                item.className = 'station-item';
+                item.innerHTML = `
+                    <strong>${station.stationName || stationId}</strong><br>
+                    <small>${station.frequency || ''} ${station.location || ''}</small>
+                `;
+                item.addEventListener('click', () => loadStation(stationId));
+                stationList.appendChild(item);
+            } catch (error) {
+                console.error(`Error loading station ${stationId}:`, error);
+                failedStations.push(stationId);
+            }
+        }
+
+        if (failedStations.length > 0) {
+            const errorItem = document.createElement('div');
+            errorItem.style.cssText = 'background: #fee; border: 1px solid #fcc; border-radius: 4px; padding: 12px; margin: 10px; color: #c33; font-size: 14px;';
+            errorItem.innerHTML = `<strong>⚠️ Warning:</strong> Failed to load ${failedStations.length} station(s): ${failedStations.join(', ')}`;
+            stationList.insertBefore(errorItem, stationList.firstChild);
         }
     } catch (error) {
         console.error('Error loading stations:', error);
-        alert('Error loading stations list');
+        const stationList = document.getElementById('stationList');
+        stationList.innerHTML = `<p style="padding: 20px; text-align: center; color: #dc2626;">Error loading stations: ${error.message}</p>`;
     }
 }
 
 // Load a specific station
 async function loadStation(stationId) {
     try {
-        // Use relative path from /editor/ directory
-        const response = await fetch(`../data/stations/${stationId}.json`);
+        const response = await fetch(`../data/stations/${stationId}.json`, { cache: 'no-store' });
+        if (!response.ok) {
+            throw new Error(`Failed to load station (HTTP ${response.status})`);
+        }
         const station = await response.json();
         
         currentStation = station;

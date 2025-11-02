@@ -326,20 +326,28 @@
             const container = document.getElementById('stations-container');
             
             try {
-                const indexResponse = await fetch('/data/stations/index.json');
+                const indexResponse = await fetch('/data/stations/index.json', { cache: 'no-store' });
                 if (!indexResponse.ok) {
                     throw new Error('Failed to load station index');
                 }
                 const indexData = await indexResponse.json();
                 const stationIds = indexData.stations || indexData;
                 
+                const failedStations = [];
                 const stationPromises = stationIds.map(async (id) => {
-                    const response = await fetch(`/data/stations/${id}.json`);
-                    if (!response.ok) {
-                        console.error(`Failed to load station: ${id}`);
+                    try {
+                        const response = await fetch(`/data/stations/${id}.json`, { cache: 'no-store' });
+                        if (!response.ok) {
+                            console.error(`Failed to load station: ${id} (HTTP ${response.status})`);
+                            failedStations.push(id);
+                            return null;
+                        }
+                        return response.json();
+                    } catch (error) {
+                        console.error(`Error loading station ${id}:`, error);
+                        failedStations.push(id);
                         return null;
                     }
-                    return response.json();
                 });
                 
                 const stations = (await Promise.all(stationPromises)).filter(s => s !== null);
@@ -361,6 +369,14 @@
                 });
                 
                 container.innerHTML = '';
+                
+                if (failedStations.length > 0) {
+                    const errorBanner = document.createElement('div');
+                    errorBanner.style.cssText = 'background: #fee; border: 1px solid #fcc; border-radius: 8px; padding: 12px 16px; margin-bottom: 20px; color: #c33;';
+                    errorBanner.innerHTML = `<strong>⚠️ Warning:</strong> Failed to load ${failedStations.length} station(s): ${failedStations.join(', ')}`;
+                    container.appendChild(errorBanner);
+                }
+                
                 container.appendChild(grid);
                 
             } catch (error) {
